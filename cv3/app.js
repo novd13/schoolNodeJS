@@ -1,66 +1,29 @@
 "use strict";
 
-setTimeout(() => {
-    console.log(1);
-}, 2000);
-console.log(2);
-setTimeout(() => {
-    console.log(3);
-}, 3000);
+const http = require('http');
+const readFile = require('fs/promises').readFile;
 
-//CALLBACK HELL
-setTimeout(() => {
-    console.log('first');
-    setTimeout(() => {
-        console.log('second');
-        setTimeout(() => {
-            console.log('third');
-            setTimeout(() => {
-                console.log('fourth');
-                setTimeout(() => {
-                    console.log('fifth');
-                }, 3000);
-            }, 3000);
-        }, 3000);
-    }, 3000);
-}, 3000);
+const server = http.createServer((req, res)=>{
+    readFile('client' +(req.url == "/" ? "/index.html" : req.url))
+    .then(f=> {
 
-//PROMISE, ASYNC/WAIT
-//THENABLE
-const delay = t => new Promise(res => setTimeout(res, t));
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+    fs.readFile('client/index.html').then(f=>res.end(f));
+    res.end(f);
+})
+.catch(e=>{
+    console.error(e);
+    res.statusCode=404;
+    res.end();
+})
+    console.log(req);
+});
 
-delay(3000)
-.then(()=>console.log('ONE'))
-.then(()=>delay(3000))
-.then(()=>console.log('TWO'))
-.catch(console.error);
 
-//.then(() => {throw 'some error'})
+server.listen(8080, ()=>console.log('Server listening: '+server.listening));
 
-//Waits on all to be done (so this would wait 3 secs)
-Promise.all([
-    delay(1000),
-    delay(2000),
-    delay(3000),
-]).then(()=>console.log('waited on everyone'))
-
-//Waits for the first one
-Promise.race([
-    delay(1000),
-    delay(2000),
-    delay(3000),
-]).then(()=>console.log('waited on the fastest'))
-
-async function myAsyncFunction() {
-    await delay(3000);
-    console.log('0-1');
-    await delay (3000);
-    console.log('0-2');
-    await Promise.all([
-        delay(3000),
-        delay(2000)
-    ]);
-    console.log('0-5');
-}
-myAsyncFunction().then(()=> console.log('0-3'));
-console.log('0-4');
+/* setTimeout(()=> {
+    server.close(()=>console.log('server closed'));
+    console.log('Not accepting new connections');
+}, 10000); */
