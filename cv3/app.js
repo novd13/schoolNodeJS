@@ -50,3 +50,17 @@ Promise.race([
     delay(2000),
     delay(3000),
 ]).then(()=>console.log('waited on the fastest'))
+
+async function myAsyncFunction() {
+    await delay(3000);
+    console.log('0-1');
+    await delay (3000);
+    console.log('0-2');
+    await Promise.all([
+        delay(3000),
+        delay(2000)
+    ]);
+    console.log('0-5');
+}
+myAsyncFunction().then(()=> console.log('0-3'));
+console.log('0-4');
