@@ -7,33 +7,14 @@ import http from 'http';
 import { readFile } from 'fs/promises';
 import WebSocket from 'ws';
 import { promisify } from 'util';
-
-redisClient.hset("prokop", "name", "Prokop", "surname", "Dveře", "heslo", "ups", (err, numOfChanged) => {
-    console.log("no. of changes: " + numOfChanged);
-});
-
-redisClient.hgetall("prokop", (err, dataObj)=>{
-    console.log(dataObj);
-})
-
-dbHset('tomas', 'surname', 'Jedno').then(()=>{return dbHgetall('tomas')}).then(console.log);
-
+import { authorized } from './myutils.mjs';
 
 const server = http.createServer((req, res) => {
+    const user = await authorized(req, res);
+    if (!user) return
 
-if (!req.headers.authorization) {
-    res.setHeader('WWW-Authenticate', 'Basic');
-    res.statusCode = 401;
-    res.end();
-    return
-}
-console.log(req.headers.authorization);
 
-const authHeader = req.headers.authorization.split(' ');
-const [username, password] = Buffer.from(authHeader[1], 'base64').toString().split(':');
-console.log(username);
-console.log(password);
-    
+
     readFile('client' + (req.url == "/" ? "/index.html" : req.url))
         .then(f => {
 
@@ -53,16 +34,16 @@ console.log(password);
 
 server.listen(8080, () => console.log('Server listening: ' + server.listening));
 
-const wss = new WebSocket.Server({port: 8085});
+const wss = new WebSocket.Server({ port: 8085 });
 
 wss.on('connection', ws => {
     let messageCounter = 0;
     console.log(ws);
     ws.send('First message to client');
-    ws.on('message', m=>{
+    ws.on('message', m => {
         console.log(`Meassage from client: ${m}`);
         ws.send(`Server Echo: ${m}`)
-        if (++messageCounter == 4) {ws.close()}
+        if (++messageCounter == 4) { ws.close() }
     })
 })
 
