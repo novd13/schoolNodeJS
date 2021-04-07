@@ -1,10 +1,39 @@
 "use strict";
 
-const http = require('http');
-var readFile = require("fs").promises.readFile;
-const WebSocket = require('ws');
+// const http = require('http');
+// var readFile = require("fs").promises.readFile;
+// const WebSocket = require('ws');
+import http from 'http';
+import { readFile } from 'fs/promises';
+import WebSocket from 'ws';
+import { promisify } from 'util';
+
+redisClient.hset("prokop", "name", "Prokop", "surname", "Dveře", "heslo", "ups", (err, numOfChanged) => {
+    console.log("no. of changes: " + numOfChanged);
+});
+
+redisClient.hgetall("prokop", (err, dataObj)=>{
+    console.log(dataObj);
+})
+
+dbHset('tomas', 'surname', 'Jedno').then(()=>{return dbHgetall('tomas')}).then(console.log);
+
 
 const server = http.createServer((req, res) => {
+
+if (!req.headers.authorization) {
+    res.setHeader('WWW-Authenticate', 'Basic');
+    res.statusCode = 401;
+    res.end();
+    return
+}
+console.log(req.headers.authorization);
+
+const authHeader = req.headers.authorization.split(' ');
+const [username, password] = Buffer.from(authHeader[1], 'base64').toString().split(':');
+console.log(username);
+console.log(password);
+    
     readFile('client' + (req.url == "/" ? "/index.html" : req.url))
         .then(f => {
 
